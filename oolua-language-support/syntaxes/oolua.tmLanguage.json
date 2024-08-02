@@ -7,9 +7,24 @@
 		{ "include": "#class_names" },
 		{ "include": "#class_keywords" },
 		{ "include": "#self" },
+		{ "include": "#import" },
         { "include": "source.lua" }
     ],
     "repository": {
+		"import": {
+			"info": [
+				"Import is a keyword that is used to include other files in the current file",
+				"Syntax: import 'This', 'That' from 'SomeFile'",
+				"Make it stand out by giving it a different color"
+			],
+
+			"begin": "\\b(import)\\s+",
+			"end": "(?=[\\)\\-{}\\[\\]\"'])",
+			"beginCaptures": {
+				"1": { "name": "entity.name.function" }
+			}
+		},
+
         "class": {
             "info": [
 				"The class is a block that starts with class and ends with end.",
