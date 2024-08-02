@@ -5,6 +5,7 @@
     "patterns": [
         { "include": "#class" },
 		{ "include": "#class_names" },
+		{ "include": "#class_keywords" },
 		{ "include": "#self" },
         { "include": "source.lua" }
     ],
@@ -21,15 +22,13 @@
 			],
 			
 			"begin": "\\b(class)\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
-			"end": "(?<=\\bend\\b)",
+			"end": "(?<=[\\)\\-{}\\[\\]\"'])",
 			"beginCaptures": {
 				"1": { "name": "keyword.control.oolua" },
 				"2": { "name": "entity.name.type.class.oolua" }
 			},
 			"patterns": [
 				{ "include": "#class_names" },
-				{ "include": "#class_keywords" },
-				{ "include": "#self" },
 				{ "include": "source.lua"}
 			]
 		},
