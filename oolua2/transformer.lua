@@ -186,6 +186,9 @@ local transformer = {}
 transformer.reserved_keywords = {
     "import", "class", "static", "oo",
 }
+transformer.stack_incrementing_keywords = {
+    "function", "if", "do", "class",
+}
 
 function transformer.transform(tokens)
     tokens = transformer.remove_unneeded(tokens) -- Creates a new table, so we don't need to worry about modifying the original table
@@ -193,35 +196,77 @@ function transformer.transform(tokens)
     local result = {}
     local current_i = 0
 
-    local function next_token()
-        if current_i >= #tokens then
-            print("Ending")
-            return nil
-        end
-
-        current_i = current_i + 1
-        return tokens[current_i]
-    end
-
-    local function peek_token(offset)
-        return tokens[current_i + (offset or 0)]
-    end
-
     local function append(...)
         for _, token in ipairs({ ... }) do
             table.insert(result, token)
         end
     end
 
+    local function next_token()
+        if current_i >= #tokens then
+            print("Ending")
+            return nil
+        end
+
+        repeat
+            current_i = current_i + 1
+
+            if current_i > #tokens then
+                return nil
+            elseif tokens[current_i].type == "whitespace" then
+                append(tokens[current_i])
+            end
+        until tokens[current_i].type ~= "whitespace"
+
+        return tokens[current_i]
+    end
+
+    local function peek_token(offset)
+        local i = current_i + (offset or 0)
+        if i < 1 or i > #tokens then
+            return nil
+        elseif tokens[i].type == "whitespace" then
+            return peek_token(offset + (offset < 0 and -1 or 1))
+        else
+            return tokens[i]
+        end
+    end
+
+    local in_class_block = false
+    local class_depth = 0
+    local stack_depth = 0
+
     while next_token() do
         local token = peek_token()
         local prev_token = peek_token(-1)
 
         -- Handle syntax errors
-        if token.type == "ident" and (prev_token == "local" or prev_token == "function") then
+        if token.type == "ident" and prev_token and (prev_token.data == "local" or prev_token.data == "function") then
             if token.data == "import" or token.data == "class" or token.data == "static" or token.data == "oo" then
                 error("Syntax error: attempting to define a variable with a reserved keyword")
             end
+        end
+
+        -- Count stack depth
+        local yes = false
+        for _, keyword in ipairs(transformer.stack_incrementing_keywords) do
+            if (token.type == "keyword" or token.type == "ident") and token.data == keyword then
+                stack_depth = stack_depth + 1
+                yes = true
+            end
+        end
+
+        if not yes and token.type == "keyword" and token.data == "end" then
+            print(class_depth)
+            if stack_depth == 0 then
+                error("Syntax error: unexpected 'end' keyword")
+            elseif stack_depth == class_depth then
+                in_class_block = false
+                class_depth = 0
+                append(transformer.string_to_tokens("--- End of class"))
+            end
+
+            stack_depth = stack_depth - 1
         end
 
         -- Parse import statement
@@ -252,6 +297,38 @@ function transformer.transform(tokens)
             goto continue
         end
 
+        -- Parse class statement
+        if token.type == "ident" and token.data == "class" then
+            print("Found class")
+            local name = next_token()
+            assert(name.type == "ident", "Syntax error: expected identifier after 'class' keyword")
+            assert(next_token().type == "symbol" and peek_token().data == "(",
+                "Syntax error: expected '(' after class name")
+            assert(not in_class_block, "Syntax error: nested class definitions are not allowed")
+
+            in_class_block = true
+            class_depth = stack_depth
+
+            local inherits = {}
+            while next_token().data ~= ")" do
+                local t = peek_token()
+                if t.type == "ident" then
+                    table.insert(inherits, t.data)
+                elseif t.type == "symbol" and t.data ~= "," then
+                    error("Syntax error: unexpected symbol '" .. t.data .. "'")
+                end
+            end
+
+            append(transformer.string_to_tokens("--- Start of class"))
+            append(transformer.string_to_tokens("local " ..
+                name.data .. " = oo.class(" .. table.concat(inherits, ", ") .. ")"))
+
+            goto continue
+        end
+
+        -- If nothing else, just append the token
+        append(token)
+
         ::continue::
     end
 
@@ -263,7 +340,7 @@ function transformer.remove_unneeded(tokens)
 
     for _, line in ipairs(tokens) do
         for i, token in ipairs(line) do
-            if token.type ~= "whitespace" and token.type ~= "comment" then
+            if token.type ~= "comment" then
                 local new = {
                     data = token.data,
                     posFirst = token.posFirst,

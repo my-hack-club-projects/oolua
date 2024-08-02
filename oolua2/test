@@ -1,1 +1,9 @@
 import "This", "That" from "path"
+-- local import = "test" -- Raises an error: reserved keyword
+
+class MyClass(InheritsFrom, That)
+-- body
+    if that then
+        local x = 1 and that or this
+    end
+end
