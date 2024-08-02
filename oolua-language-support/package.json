@@ -19,7 +19,10 @@
     "grammars": [{
       "language": "oolua",
       "scopeName": "source.oolua",
-      "path": "./syntaxes/oolua.tmLanguage.json"
+      "path": "./syntaxes/oolua.tmLanguage.json",
+      "embeddedLanguages": {
+        "source.lua": "lua"
+      }
     }]
   }
 }
