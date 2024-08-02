@@ -1,0 +1,25 @@
+class MyClass()
+    static class_prop = "class property"
+    local private_prop = "private property"
+
+    static function class_method(...)
+        print("class method called with", ...)
+    end
+
+    function init(self, test)
+        self.instance_property = test
+    end
+end
+
+print(MyClass.class_prop)
+
+local instance = MyClass("test")
+
+print(instance.instance_property)
+instance.class_method("hello")
+
+-- Test = import({"Test"}).from("module") -- Compiled lua code
+
+import "Test" from "module"
+
+print(Test)
