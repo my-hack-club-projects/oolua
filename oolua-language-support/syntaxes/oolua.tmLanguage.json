@@ -1,0 +1,32 @@
+{
+	"$schema": "https://raw.githubusercontent.com/microsoft/vscode/main/extensions/lua/syntaxes/lua.tmLanguage.json",
+	"name": "OOLua",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#strings"
+		}
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.oolua",
+				"match": "\\b(if|while|for|return)\\b"
+			}]
+		},
+		"strings": {
+			"name": "string.quoted.double.oolua",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.oolua",
+					"match": "\\\\."
+				}
+			]
+		}
+	},
+	"scopeName": "source.oolua"
+}

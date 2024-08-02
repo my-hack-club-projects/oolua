@@ -1,0 +1,25 @@
+{
+  "name": "oolua-language-support",
+  "displayName": "OOLua Language Support",
+  "description": "Syntax highlighting for the OOLua language",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.92.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "oolua",
+      "aliases": ["OOLua", "oolua"],
+      "extensions": [".oolua"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "oolua",
+      "scopeName": "source.oolua",
+      "path": "./syntaxes/oolua.tmLanguage.json"
+    }]
+  }
+}
