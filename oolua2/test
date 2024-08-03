@@ -1,21 +1,12 @@
-import "This", "That" from "path"
--- local import = "test" -- Raises an error: reserved keyword
-
-class MyClass(InheritsFrom, That)
-    static my_static_field = "hello" .. string.split("world", "o")[1]
-    print("test")
-
-    static function testFunction(args, ...)
-        print("test")
-    end
-
-    local function myPrivateFunc()
-
-    end
+class MyClass()
+    static myStaticVar = 1
 
     function init(self, ...)
-
+        self.instanceAttr = "Hello world"
     end
--- body
-
 end
+
+local instance = MyClass()
+
+print(instance.myStaticVar)
+print(instance.instanceAttr)

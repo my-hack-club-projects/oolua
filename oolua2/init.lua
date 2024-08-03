@@ -2,14 +2,37 @@
 -- Will also act as a CLI for the program.
 local inspect = require("inspect")
 local lexer, transformer, reconstructor = require("lexer"), require("transformer"), require("reconstructor")
+local cli = require("cli")
 
-local path = arg[1]
-local file = io.open(path, "r")
-local contents = file:read("*a")
-file:close()
+local oolua = {}
 
-local lexer_result = lexer(contents)
-local transformed = transformer(lexer_result)
-local code = reconstructor(transformed)
+function oolua.compile(input)
+    local lex = lexer(input)
+    local transformed = transformer(lex)
+    local compiled = reconstructor(transformed)
 
-print(code)
+    return compiled
+end
+
+function oolua.run(code)
+    local injected = require("injected")
+    local env = {}
+    for k, v in pairs(_G) do
+        env[k] = v
+    end
+    for k, v in pairs(injected) do
+        env[k] = v
+    end
+    local f, err = load(code, "oolua", "t", env)
+    if not f then
+        print("Compilation error: " .. err)
+        return
+    end
+    return f()
+end
+
+if #arg > 0 then
+    return cli(arg, oolua)
+else
+    return oolua
+end

@@ -43,7 +43,6 @@ function transformer.transform(tokens)
 
     local function next_token()
         if current_i >= #tokens then
-            print("Ending")
             return nil
         end
 
@@ -165,7 +164,8 @@ function transformer.transform(tokens)
         if token.type == "ident" and token.data == "class" then
             local name = next_token()
             assert(name.type == "ident", "Syntax error: expected identifier after 'class' keyword")
-            assert(next_token().type == "symbol" and peek_token().data == "(",
+            local bracket = next_token()
+            assert(bracket.type == "symbol" and (bracket.data == "(" or bracket.data == "()"),
                 "Syntax error: expected '(' after class name")
             assert(not in_class_block, "Syntax error: nested class definitions are not allowed")
 
@@ -174,19 +174,22 @@ function transformer.transform(tokens)
             class_depth = stack_depth
 
             local inherits = {}
-            while next_token().data ~= ")" do
-                local t = peek_token()
-                if t.type == "ident" then
-                    table.insert(inherits, t.data)
-                elseif t.type == "symbol" and t.data ~= "," then
-                    error("Syntax error: unexpected symbol '" .. t.data .. "'")
+            if bracket.data ~= "()" then
+                while next_token().data ~= ")" do
+                    local t = peek_token()
+                    if t.type == "ident" then
+                        table.insert(inherits, t.data)
+                    elseif t.type == "symbol" and t.data ~= "," then
+                        error("Syntax error: unexpected symbol '" .. t.data .. "'")
+                    end
                 end
             end
 
             append(transformer.string_to_tokens("--- Start of class"))
-            append(transformer.string_to_tokens("do")) -- To make local stuff truly local
-            append(transformer.string_to_tokens("local " ..
-                name.data .. " = oo.class(" .. table.concat(inherits, ", ") .. ")"))
+            append(transformer.string_to_tokens("local " .. class_name .. "; do")) -- To make local stuff truly local
+            append(transformer.string_to_tokens(
+                name.data .. " = oo.class(" .. table.concat(inherits, ", ") .. ")"
+            ))
 
             goto continue
         end
