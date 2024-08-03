@@ -223,7 +223,6 @@ function transformer.transform(tokens)
 
         repeat
             current_i = current_i + 1
-            if tokens[current_i].data == "class" then print("FOUND CLASS") end
 
             if current_i > #tokens then
                 return nil
@@ -231,10 +230,7 @@ function transformer.transform(tokens)
                 append(tokens[current_i])
             elseif _find({"keyword", "ident"}, tokens[current_i].type) and _find(transformer.stack_incrementing_keywords, tokens[current_i].data) then
                 stack_depth = stack_depth + 1
-                print("Incrementing stack_depth to " .. stack_depth .. " because of '" .. tokens[current_i].data .. "'")
             elseif tokens[current_i].type == "keyword" and tokens[current_i].data == "end" then
-                print("Stack depth "..stack_depth)
-                print("In class: " .. tostring(in_class_block))
                 if stack_depth == class_depth and in_class_block then
                     in_class_block = false
                     class_depth = 0
@@ -314,7 +310,6 @@ function transformer.transform(tokens)
 
         -- Parse import statement
         if token.type == "ident" and token.data == "import" then
-            print("Found import")
             local modules = {}
             while next_token().type ~= "ident" do
                 local t = peek_token()
@@ -342,7 +337,6 @@ function transformer.transform(tokens)
 
         -- Parse class statement
         if token.type == "ident" and token.data == "class" then
-            print("Found class")
             local name = next_token()
             assert(name.type == "ident", "Syntax error: expected identifier after 'class' keyword")
             assert(next_token().type == "symbol" and peek_token().data == "(",
@@ -373,9 +367,6 @@ function transformer.transform(tokens)
 
         -- Parse special statements inside class blocks
         if in_class_block and (stack_depth == class_depth or _find(transformer.stack_incrementing_keywords, token.data)) then
-            if token.data == "function" then
-                print("FOUND FUNCTION")
-            end
             -- Static variables and functions
             if token.type == "ident" and token.data == "static" then
                 local name = next_token()
@@ -383,14 +374,12 @@ function transformer.transform(tokens)
                     "Syntax error: expected identifier or function declaration after 'static' keyword")
 
                 if name.data == "function" then
-                    print("Found static function")
                     local function_name = next_token()
                     assert(function_name.type == "ident",
                         "Syntax error: expected identifier after 'function' keyword")
 
                     append(transformer.string_to_tokens("function "..class_name.."."..function_name.data))
                 else
-                    print("Found static variable")
                     assert(next_token().type == "operator" and peek_token().data == "=",
                         "Syntax error: expected '=' after static variable name")
 
@@ -409,9 +398,7 @@ function transformer.transform(tokens)
             end
 
             -- Instance functions
-            print(token.data)
             if token.type == "keyword" and token.data == "function" and prev_token.data ~= "local" then
-                print("Found instance function")
                 local name = next_token()
 
                 assert(name.type == "ident", "Syntax error: expected identifier after 'function' keyword")
