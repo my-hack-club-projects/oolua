@@ -9,10 +9,6 @@ return function(tokens)
             result = result .. "\n"
         end
 
-        -- if prev_token and prev_token.type ~= "whitespace" and token.type ~= "whitespace" then
-        --     result = result .. " "
-        -- end
-
         result = result .. token.data
         prev_token = token
     end

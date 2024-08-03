@@ -187,14 +187,27 @@ transformer.reserved_keywords = {
     "import", "class", "static", "oo",
 }
 transformer.stack_incrementing_keywords = {
-    "function", "if", "do", "class",
+    "function", "if", "do", "class"
 }
+
+local function _find(t, v)
+    for i, w in ipairs(t) do
+        if w == v then
+            return i
+        end
+    end
+end
 
 function transformer.transform(tokens)
     tokens = transformer.remove_unneeded(tokens) -- Creates a new table, so we don't need to worry about modifying the original table
 
     local result = {}
     local current_i = 0
+
+    local in_class_block = false
+    local class_name = ""
+    local class_depth = 0
+    local stack_depth = 0
 
     local function append(...)
         for _, token in ipairs({ ... }) do
@@ -210,8 +223,42 @@ function transformer.transform(tokens)
 
         repeat
             current_i = current_i + 1
+            if tokens[current_i].data == "class" then print("FOUND CLASS") end
 
             if current_i > #tokens then
+                return nil
+            elseif tokens[current_i].type == "whitespace" then
+                append(tokens[current_i])
+            elseif _find({"keyword", "ident"}, tokens[current_i].type) and _find(transformer.stack_incrementing_keywords, tokens[current_i].data) then
+                stack_depth = stack_depth + 1
+                print("Incrementing stack_depth to " .. stack_depth .. " because of '" .. tokens[current_i].data .. "'")
+            elseif tokens[current_i].type == "keyword" and tokens[current_i].data == "end" then
+                print("Stack depth "..stack_depth)
+                print("In class: " .. tostring(in_class_block))
+                if stack_depth == class_depth and in_class_block then
+                    in_class_block = false
+                    class_depth = 0
+                    class_name = ""
+                    append(transformer.string_to_tokens("--- End of class block"))
+                elseif stack_depth <= 0 then
+                    error("Syntax error: unexpected 'end' keyword")
+                end
+                stack_depth = stack_depth - 1
+            end
+        until tokens[current_i].type ~= "whitespace"
+
+        return tokens[current_i]
+    end
+
+    local function previous_token()
+        if current_i <= 1 then
+            return nil
+        end
+
+        repeat
+            current_i = current_i - 1
+
+            if current_i < 1 then
                 return nil
             elseif tokens[current_i].type == "whitespace" then
                 append(tokens[current_i])
@@ -232,10 +279,6 @@ function transformer.transform(tokens)
         end
     end
 
-    local in_class_block = false
-    local class_depth = 0
-    local stack_depth = 0
-
     while next_token() do
         local token = peek_token()
         local prev_token = peek_token(-1)
@@ -248,26 +291,26 @@ function transformer.transform(tokens)
         end
 
         -- Count stack depth
-        local yes = false
-        for _, keyword in ipairs(transformer.stack_incrementing_keywords) do
-            if (token.type == "keyword" or token.type == "ident") and token.data == keyword then
-                stack_depth = stack_depth + 1
-                yes = true
-            end
-        end
+        -- local yes = false
+        -- for _, keyword in ipairs(transformer.stack_incrementing_keywords) do
+        --     if (token.type == "keyword" or token.type == "ident") and token.data == keyword then
+        --         stack_depth = stack_depth + 1
+        --         yes = true
+        --     end
+        -- end
 
-        if not yes and token.type == "keyword" and token.data == "end" then
-            print(class_depth)
-            if stack_depth == 0 then
-                error("Syntax error: unexpected 'end' keyword")
-            elseif stack_depth == class_depth then
-                in_class_block = false
-                class_depth = 0
-                append(transformer.string_to_tokens("--- End of class"))
-            end
+        -- if not yes and token.type == "keyword" and token.data == "end" then
+        --     if stack_depth == 0 then
+        --         error("Syntax error: unexpected 'end' keyword")
+        --     elseif stack_depth == class_depth then
+        --         in_class_block = false
+        --         class_depth = 0
+        --         class_name = ""
+        --         append(transformer.string_to_tokens("--- End of class"))
+        --     end
 
-            stack_depth = stack_depth - 1
-        end
+        --     stack_depth = stack_depth - 1
+        -- end
 
         -- Parse import statement
         if token.type == "ident" and token.data == "import" then
@@ -307,6 +350,7 @@ function transformer.transform(tokens)
             assert(not in_class_block, "Syntax error: nested class definitions are not allowed")
 
             in_class_block = true
+            class_name = name.data
             class_depth = stack_depth
 
             local inherits = {}
@@ -320,10 +364,73 @@ function transformer.transform(tokens)
             end
 
             append(transformer.string_to_tokens("--- Start of class"))
+            append(transformer.string_to_tokens("do")) -- To make local stuff truly local
             append(transformer.string_to_tokens("local " ..
                 name.data .. " = oo.class(" .. table.concat(inherits, ", ") .. ")"))
 
             goto continue
+        end
+
+        -- Parse special statements inside class blocks
+        if in_class_block and (stack_depth == class_depth or _find(transformer.stack_incrementing_keywords, token.data)) then
+            if token.data == "function" then
+                print("FOUND FUNCTION")
+            end
+            -- Static variables and functions
+            if token.type == "ident" and token.data == "static" then
+                local name = next_token()
+                assert(name.type == "ident" or name.data == "function",
+                    "Syntax error: expected identifier or function declaration after 'static' keyword")
+
+                if name.data == "function" then
+                    print("Found static function")
+                    local function_name = next_token()
+                    assert(function_name.type == "ident",
+                        "Syntax error: expected identifier after 'function' keyword")
+
+                    append(transformer.string_to_tokens("function "..class_name.."."..function_name.data))
+                else
+                    print("Found static variable")
+                    assert(next_token().type == "operator" and peek_token().data == "=",
+                        "Syntax error: expected '=' after static variable name")
+
+                    local rest_of_line = {}
+                    local linePos = token.posOnLine
+                    while next_token().posOnLine > linePos do
+                        table.insert(rest_of_line, peek_token())
+                    end
+                    previous_token()
+
+                    append(transformer.string_to_tokens(class_name .. "." .. name.data .. " = "))
+                    append(table.unpack(rest_of_line))
+                end
+
+                goto continue
+            end
+
+            -- Instance functions
+            print(token.data)
+            if token.type == "keyword" and token.data == "function" and prev_token.data ~= "local" then
+                print("Found instance function")
+                local name = next_token()
+
+                assert(name.type == "ident", "Syntax error: expected identifier after 'function' keyword")
+                next_token() -- skip the opening bracket '('
+
+                local first_param = next_token()
+                local is_self = first_param.data == "self" and first_param.type == "ident"
+
+                if is_self then
+                    local next = peek_token(1)
+                    if next.data == "," then
+                        next_token()
+                    end
+                end
+
+                append(transformer.string_to_tokens("function " .. class_name .. ":".. name.data .. "(" .. (is_self == false and first_param.data or "")))
+
+                goto continue
+            end
         end
 
         -- If nothing else, just append the token

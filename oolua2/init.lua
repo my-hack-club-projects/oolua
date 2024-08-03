@@ -12,6 +12,4 @@ local lexer_result = lexer(contents)
 local transformed = transformer(lexer_result)
 local code = reconstructor(transformed)
 
-print(inspect(transformed))
-print(string.rep("-", 50))
 print(code)
