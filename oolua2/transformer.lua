@@ -1,179 +1,5 @@
 -- This program will read the lexer result, modify it and return the result for it to be re-constructed
--- Example lexer output:
--- { { {
---   data = "local",
---   posFirst = 1,
---   posLast = 5,
---   type = "keyword"
--- }, {
---   data = " ",
---   posFirst = 6,
---   posLast = 6,
---   type = "whitespace"
--- }, {
---   data = "x",
---   posFirst = 7,
---   posLast = 7,
---   type = "ident"
--- }, {
---   data = " ",
---   posFirst = 8,
---   posLast = 8,
---   type = "whitespace"
--- }, {
---   data = "=",
---   posFirst = 9,
---   posLast = 9,
---   type = "operator"
--- }, {
---   data = " ",
---   posFirst = 10,
---   posLast = 10,
---   type = "whitespace"
--- }, {
---   data = "1",
---   posFirst = 11,
---   posLast = 11,
---   type = "number"
--- } }, {}, { {
---   data = "local",
---   posFirst = 1,
---   posLast = 5,
---   type = "keyword"
--- }, {
---   data = " ",
---   posFirst = 6,
---   posLast = 6,
---   type = "whitespace"
--- }, {
---   data = "function",
---   posFirst = 7,
---   posLast = 14,
---   type = "keyword"
--- }, {
---   data = " ",
---   posFirst = 15,
---   posLast = 15,
---   type = "whitespace"
--- }, {
---   data = "f",
---   posFirst = 16,
---   posLast = 16,
---   type = "ident"
--- }, {
---   data = "()",
---   posFirst = 17,
---   posLast = 18,
---   type = "symbol"
--- } }, { {
---   data = "    ",
---   posFirst = 1,
---   posLast = 4,
---   type = "whitespace"
--- }, {
---   data = "x",
---   posFirst = 5,
---   posLast = 5,
---   type = "ident"
--- }, {
---   data = " ",
---   posFirst = 6,
---   posLast = 6,
---   type = "whitespace"
--- }, {
---   data = "=",
---   posFirst = 7,
---   posLast = 7,
---   type = "operator"
--- }, {
---   data = " ",
---   posFirst = 8,
---   posLast = 8,
---   type = "whitespace"
--- }, {
---   data = "x",
---   posFirst = 9,
---   posLast = 9,
---   type = "ident"
--- }, {
---   data = " ",
---   posFirst = 10,
---   posLast = 10,
---   type = "whitespace"
--- }, {
---   data = "+",
---   posFirst = 11,
---   posLast = 11,
---   type = "operator"
--- }, {
---   data = " ",
---   posFirst = 12,
---   posLast = 12,
---   type = "whitespace"
--- }, {
---   data = "1",
---   posFirst = 13,
---   posLast = 13,
---   type = "number"
--- } }, { {
---   data = "    ",
---   posFirst = 1,
---   posLast = 4,
---   type = "whitespace"
--- }, {
---   data = "return",
---   posFirst = 5,
---   posLast = 10,
---   type = "keyword"
--- }, {
---   data = " ",
---   posFirst = 11,
---   posLast = 11,
---   type = "whitespace"
--- }, {
---   data = "x",
---   posFirst = 12,
---   posLast = 12,
---   type = "ident"
--- } }, { {
---   data = "end",
---   posFirst = 1,
---   posLast = 3,
---   type = "keyword"
--- } }, {}, { {
---   data = "print",
---   posFirst = 1,
---   posLast = 5,
---   type = "ident"
--- }, {
---   data = "(",
---   posFirst = 6,
---   posLast = 6,
---   type = "symbol"
--- }, {
---   data = "f",
---   posFirst = 7,
---   posLast = 7,
---   type = "ident"
--- }, {
---   data = "())",
---   posFirst = 8,
---   posLast = 10,
---   type = "symbol"
--- }, {
---   data = " ",
---   posFirst = 11,
---   posLast = 11,
---   type = "whitespace"
--- }, {
---   data = "-- 2",
---   posFirst = 12,
---   posLast = 15,
---   type = "comment"
--- } }, {} }
-
 --[[
-
 Syntax rules:
 - Cannot define a variable with the following:
     - import, class, static, oo
@@ -228,7 +54,7 @@ function transformer.transform(tokens)
                 return nil
             elseif tokens[current_i].type == "whitespace" then
                 append(tokens[current_i])
-            elseif _find({"keyword", "ident"}, tokens[current_i].type) and _find(transformer.stack_incrementing_keywords, tokens[current_i].data) then
+            elseif _find({ "keyword", "ident" }, tokens[current_i].type) and _find(transformer.stack_incrementing_keywords, tokens[current_i].data) then
                 stack_depth = stack_depth + 1
             elseif tokens[current_i].type == "keyword" and tokens[current_i].data == "end" then
                 if stack_depth == class_depth and in_class_block then
@@ -378,7 +204,7 @@ function transformer.transform(tokens)
                     assert(function_name.type == "ident",
                         "Syntax error: expected identifier after 'function' keyword")
 
-                    append(transformer.string_to_tokens("function "..class_name.."."..function_name.data))
+                    append(transformer.string_to_tokens("function " .. class_name .. "." .. function_name.data))
                 else
                     assert(next_token().type == "operator" and peek_token().data == "=",
                         "Syntax error: expected '=' after static variable name")
@@ -414,7 +240,8 @@ function transformer.transform(tokens)
                     end
                 end
 
-                append(transformer.string_to_tokens("function " .. class_name .. ":".. name.data .. "(" .. (is_self == false and first_param.data or "")))
+                append(transformer.string_to_tokens("function " ..
+                class_name .. ":" .. name.data .. "(" .. (is_self == false and first_param.data or "")))
 
                 goto continue
             end
