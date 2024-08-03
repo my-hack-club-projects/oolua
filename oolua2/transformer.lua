@@ -209,15 +209,7 @@ function transformer.transform(tokens)
                     assert(next_token().type == "operator" and peek_token().data == "=",
                         "Syntax error: expected '=' after static variable name")
 
-                    local rest_of_line = {}
-                    local linePos = token.posOnLine
-                    while next_token().posOnLine > linePos do
-                        table.insert(rest_of_line, peek_token())
-                    end
-                    previous_token()
-
                     append(transformer.string_to_tokens(class_name .. "." .. name.data .. " = "))
-                    append(table.unpack(rest_of_line))
                 end
 
                 goto continue
@@ -241,7 +233,7 @@ function transformer.transform(tokens)
                 end
 
                 append(transformer.string_to_tokens("function " ..
-                class_name .. ":" .. name.data .. "(" .. (is_self == false and first_param.data or "")))
+                    class_name .. ":" .. name.data .. "(" .. (is_self == false and first_param.data or "")))
 
                 goto continue
             end
