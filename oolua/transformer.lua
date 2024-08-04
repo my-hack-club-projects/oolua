@@ -179,6 +179,14 @@ function transformer.transform(tokens)
                 name.data .. " = oo.class(" .. '"' .. class_name .. '", ' .. table.concat(inherits, ", ") .. ")"
             ))
 
+            if peek_token(1).type == "keyword" and peek_token(1).data == "end" then
+                in_class_block = false
+                class_depth = 0
+                class_name = ""
+
+                append(next_token())
+            end
+
             goto continue
         end
 

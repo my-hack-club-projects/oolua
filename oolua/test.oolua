@@ -24,3 +24,5 @@ end
 
 print(MoreException:is(AnotherException)) -- true
 print(MoreException:is(Exception)) -- true
+
+class A(Exception) end
