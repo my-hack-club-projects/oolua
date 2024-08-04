@@ -1,6 +1,6 @@
 local oo = require("modules.oo")
 
-local Number = oo.class()
+local Number = oo.class("Number")
 Number.__inspect_hide = true
 
 function Number.init(self, value)

@@ -1,6 +1,6 @@
 local oo = require("modules.oo")
 
-local listener = oo.class()
+local listener = oo.class("Listener")
 
 function listener.init(self, func, ...)
     self._reverse = nil
@@ -30,7 +30,7 @@ function listener:stop()
     end
 end
 
-local signal = oo.class()
+local signal = oo.class("Signal")
 
 function signal.init(self)
     self.listeners = {}

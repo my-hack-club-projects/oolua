@@ -1,11 +1,14 @@
 local inspect = require("modules.inspect")
 
 local quantifiers = require("modules.quantifiers")
+local error_handling = require("modules.error_handling")
 
 return {
     oo = require("modules.oo"),
     inspect = inspect,
     signal = require("modules.signal"),
+
+    pcall = error_handling.pcall,
 
     all = quantifiers.all,
     any = quantifiers.any,
@@ -13,6 +16,7 @@ return {
 
     Table = require("modules.table"),
     Number = require("modules.number"),
+    Exception = error_handling.exception,
 
     import = function(modules)
         return {

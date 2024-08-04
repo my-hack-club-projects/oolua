@@ -1,7 +1,26 @@
-local myTable = {true, false, false}
+class MyException(Exception)
+end
 
-print(all(myTable)) -- false
-print(any(myTable)) -- true
-print(none(myTable)) -- false
+pcall
+    error(MyException("Test"))
+except Exception as e
+    print(e)
+except MyException as e
+    print("MyException occured")
+    print(e)
+end
 
-print(all(myTable, function(v) return true end)) -- custom function/condition
+print(MyException:is(Exception)) -- true
+
+class AnotherException(Exception)
+end
+
+print(MyException:is(AnotherException)) -- false
+
+print(MyException:is(MyException)) -- true
+
+class MoreException(AnotherException)
+end
+
+print(MoreException:is(AnotherException)) -- true
+print(MoreException:is(Exception)) -- true
