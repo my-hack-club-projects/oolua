@@ -20,7 +20,7 @@ class MyClass() -- define a class using the 'class' keyword. you can optionally 
         self.instanceAttr = "Hello world"
     end
 
-    function myInstanceFunction(..) -- any non-static non-local function is a colon function
+    function myInstanceFunction(...) -- any non-static non-local function is a colon function
     end
 end
 
