@@ -226,6 +226,17 @@ function transformer.transform(tokens)
             goto continue
         end
 
+        -- String auto-wrap in parantheses
+        if token.type == "string_start" then
+            append(transformer.string_to_tokens("(\""))
+            while next_token().type ~= "string_end" do
+                append(peek_token())
+            end
+            append(token)
+            append(transformer.string_to_tokens(")"))
+            goto continue
+        end
+
         -- If nothing else, just append the token
         append(token)
 

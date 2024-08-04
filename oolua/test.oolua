@@ -1,10 +1,2 @@
-local myTable = {"A", "B", "C"}
-print(myTable)
-print(#myTable)
-print(myTable[1])
-myTable:append("D")
-print(myTable)
-
-for i, v in pairs(myTable) do
-    print(i, v)
-end
+local myString = "Hello":upper()
+print(myString)
