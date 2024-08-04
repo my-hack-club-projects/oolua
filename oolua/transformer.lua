@@ -237,6 +237,12 @@ function transformer.transform(tokens)
             goto continue
         end
 
+        -- Number objects (prefix all numbers with 'Number(' and suffix with ')')
+        if token.type == "number" then
+            append(transformer.string_to_tokens("Number(" .. token.data .. ")"))
+            goto continue
+        end
+
         -- If nothing else, just append the token
         append(token)
 

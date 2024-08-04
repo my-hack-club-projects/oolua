@@ -1,6 +1,6 @@
 -- This will later be a wrapper that handles errors, retrieves file contents, etc.
 -- Will also act as a CLI for the program.
-local inspect = require("inspect")
+local inspect = require("modules.inspect")
 local lexer, transformer, reconstructor = require("lexer"), require("transformer"), require("reconstructor")
 local cli = require("cli")
 

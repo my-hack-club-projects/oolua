@@ -286,7 +286,9 @@ function Inspector:putValue(v)
     elseif tv == 'table' and not self.ids[v] then
         local t = v
 
-        if t == inspect.KEY or t == inspect.METATABLE then
+        if t.__inspect then
+            puts(buf, t:__inspect())
+        elseif t == inspect.KEY or t == inspect.METATABLE then
             puts(buf, tostring(t))
         elseif self.level >= self.depth then
             puts(buf, '{...}')

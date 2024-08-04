@@ -4,6 +4,7 @@ return {
     oo = require("modules.oo"),
     inspect = inspect,
     Table = require("modules.table"),
+    Number = require("modules.number"),
 
     import = function(modules)
         return {
