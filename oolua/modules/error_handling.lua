@@ -8,7 +8,11 @@ function error_handling.exception.init(self, message)
 end
 
 function error_handling.exception:__tostring()
-    return self.__name .. ": " .. self.message
+    if self.message then
+        return self.__name .. ": " .. self.message
+    else
+        return self.__name
+    end
 end
 
 function error_handling.exception:__inspect()
@@ -23,26 +27,37 @@ function error_handling.pcall(func)
     local chainable = {}
     local exception_functions = {}
 
-    local function except(exception, excfunc)
-        exception_functions[exception.__name] = excfunc
+    chainable.except = function(exception, exfunc)
+        if exfunc then
+            exception_functions[exception()] = exfunc
+        else
+            exfunc = exception
+            exception_functions[error_handling.exception()] = exfunc
+        end
 
         return chainable
     end
 
-    chainable.except = except
     chainable.run = function()
-        local original_exception = ""
-        local success, exception_name = xpcall(func, function(err)
-            original_exception = err
-            return exceptionNameFromMessage(err)
+        local exception_is_string = true
+        local success, thrown_exception = xpcall(func, function(err)
+            exception_is_string = type(err) == "string"
+
+            return err
         end)
 
         if not success then
-            if exception_functions[exception_name] then
-                exception_functions[exception_name](original_exception)
-            else
-                error(original_exception)
+            for exception, f in pairs(exception_functions) do
+                if exception_is_string and exceptionNameFromMessage(thrown_exception) == exception.__name then
+                    f(error_handling.exception(thrown_exception))
+                    return
+                elseif thrown_exception:is(exception) then
+                    f(thrown_exception)
+                    return
+                end
             end
+
+            error(thrown_exception)
         end
     end
 

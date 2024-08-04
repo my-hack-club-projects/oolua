@@ -5,6 +5,11 @@ function oo.class(name, ...)
     proto.__index = proto
     proto.__name = name or "Class"
     proto.__parents = { ... }
+    proto.__children = {}
+
+    for _, parent in ipairs(proto.__parents) do
+        table.insert(parent.__children, proto)
+    end
 
     setmetatable(proto, {
         __call = function(cls, ...)
@@ -23,22 +28,27 @@ function oo.class(name, ...)
     end
 
     function proto:is(a)
-        local function recurse(parents)
-            for _, parent in ipairs(parents) do
-                if parent == a then
+        local function recurse(children)
+            if not children then
+                return false
+            end
+
+            for _, child in ipairs(children) do
+                if child.__name == self.__name then
                     return true
-                elseif recurse(parent.__parents) then
+                end
+                if child.__children and recurse(child.__children) then
                     return true
                 end
             end
             return false
         end
 
-        if a == proto then
+        if self.__name == a.__name then
             return true
         end
 
-        return recurse(self.__parents)
+        return recurse(a.__children)
     end
 
     return proto

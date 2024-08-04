@@ -3,8 +3,8 @@ end
 
 try
     error(MyException("Test"))
-except Exception as e
-    print(e)
+except Exception as e -- This runs, because MyException is a subclass of Exception
+    print(tostring(e) .. " occured")
 except MyException as e
     print("MyException occured")
     print(e)
@@ -26,3 +26,9 @@ print(MoreException:is(AnotherException)) -- true
 print(MoreException:is(Exception)) -- true
 
 class A(Exception) end
+
+try
+   error(Exception)
+except
+    print("An error occured")
+end

@@ -252,15 +252,20 @@ function transformer.transform(tokens)
 
         if in_try_block and stack_depth == try_depth then
             if token.type == "ident" and token.data == "except" then
-                local exception_class = next_token()
-                assert(exception_class.type == "ident", "Syntax error: expected identifier after 'except' keyword")
-                assert(next_token().type == "ident" and peek_token().data == "as",
-                    "Syntax error: expected 'as' keyword after exception class")
-                local exception_variable = next_token()
-                assert(exception_variable.type == "ident", "Syntax error: expected identifier after 'as' keyword")
+                if peek_token(3).type == "ident" and peek_token(3).data == "as" then
+                    local exception_class = next_token()
+                    assert(exception_class.type == "ident", "Syntax error: expected identifier after 'except' keyword")
+                    assert(next_token().type == "ident" and peek_token().data == "as",
+                        "Syntax error: expected 'as' keyword after exception class")
+                    local exception_variable = next_token()
+                    assert(exception_variable.type == "ident", "Syntax error: expected identifier after 'as' keyword")
 
-                append(transformer.string_to_tokens("end).except(" ..
-                    exception_class.data .. ", function(" .. exception_variable.data .. ")"))
+                    append(transformer.string_to_tokens("end).except(" ..
+                        exception_class.data .. ", function(" .. exception_variable.data .. ")"))
+                else
+                    append(transformer.string_to_tokens("end).except(function()"))
+                end
+
                 append(transformer.string_to_tokens("--- Start of exception handler block"))
                 goto continue
             end
