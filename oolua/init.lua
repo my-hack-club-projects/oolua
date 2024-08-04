@@ -25,7 +25,7 @@ function oolua.run(code)
     end
     local f, err = load(code, "oolua", "t", env)
     if not f then
-        print("Compilation error: " .. err)
+        print("Post-compilation error: " .. err)
         return
     end
     return f()

@@ -6,3 +6,6 @@ t:append("E")
 for i, v in t do
     print(i, v)
 end
+
+local x = 1
+x += 1

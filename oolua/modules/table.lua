@@ -50,6 +50,18 @@ function Table:remove(value)
     end
 end
 
+function Table:pop(i)
+    if i then
+        if type(i) == "number" then
+            return table.remove(self, i)
+        else
+            return table.remove(self, self:find(i))
+        end
+    else
+        return table.remove(self)
+    end
+end
+
 function Table:clear()
     for i = #self, 1, -1 do
         table.remove(self, i)
