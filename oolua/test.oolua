@@ -1,7 +1,7 @@
-local mySignal = signal()
+local myTable = {true, false, false}
 
-mySignal:listen(function(a,b,c)
-    print("mySignal",a,b,c)
-end, 1)
+print(all(myTable)) -- false
+print(any(myTable)) -- true
+print(none(myTable)) -- false
 
-mySignal:dispatch(2,3)
+print(all(myTable, function(v) return true end)) -- custom function/condition

@@ -1,9 +1,15 @@
 local inspect = require("modules.inspect")
 
+local quantifiers = require("modules.quantifiers")
+
 return {
     oo = require("modules.oo"),
     inspect = inspect,
     signal = require("modules.signal"),
+
+    all = quantifiers.all,
+    any = quantifiers.any,
+    none = quantifiers.none,
 
     Table = require("modules.table"),
     Number = require("modules.number"),
