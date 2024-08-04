@@ -111,28 +111,6 @@ function transformer.transform(tokens)
             end
         end
 
-        -- Count stack depth
-        -- local yes = false
-        -- for _, keyword in ipairs(transformer.stack_incrementing_keywords) do
-        --     if (token.type == "keyword" or token.type == "ident") and token.data == keyword then
-        --         stack_depth = stack_depth + 1
-        --         yes = true
-        --     end
-        -- end
-
-        -- if not yes and token.type == "keyword" and token.data == "end" then
-        --     if stack_depth == 0 then
-        --         error("Syntax error: unexpected 'end' keyword")
-        --     elseif stack_depth == class_depth then
-        --         in_class_block = false
-        --         class_depth = 0
-        --         class_name = ""
-        --         append(transformer.string_to_tokens("--- End of class"))
-        --     end
-
-        --     stack_depth = stack_depth - 1
-        -- end
-
         -- Parse import statement
         if token.type == "ident" and token.data == "import" then
             local modules = {}
