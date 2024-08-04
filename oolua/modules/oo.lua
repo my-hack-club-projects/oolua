@@ -15,7 +15,7 @@ function oo.class(...)
         local self = setmetatable({}, proto)
 
         if proto.init then
-            self:init(...)
+            self.init(self, ...)
         end
         return self
     end

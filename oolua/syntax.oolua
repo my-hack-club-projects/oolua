@@ -1,0 +1,32 @@
+-- import "__all" from "path.to.module" -- Import modules like this
+-- the modules need to expose the functions/classes in an 'exports' dictionary
+--[[
+return {
+    exports = {
+        someFunction = someFunction, -- like this
+    },
+}
+]]
+-- if you don't want to do this, you can still use regular 'require'
+
+class MyClass() -- define a class using the 'class' keyword. you can optionally pass classes it inherits from into the parantheses.
+    static myStaticVar = 1 -- static properties or functions using the 'static' keyword
+    local privateAttribute = 0 -- private class properties. private instance properties are not supported (yet?)
+    static function myStaticFunction(...)
+        print("static function called")
+    end
+
+    static function init(self, ...) -- constructor is the 'init' static function
+        self.instanceAttr = "Hello world"
+    end
+
+    function myInstanceFunction(..) -- any non-static non-local function is a colon function
+    end
+end
+
+local instance = MyClass()
+
+print(instance.myStaticVar)
+print(instance.instanceAttr)
+instance.myStaticFunction()
+instance:myInstanceFunction()
