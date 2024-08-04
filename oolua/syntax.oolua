@@ -30,3 +30,49 @@ print(instance.myStaticVar)
 print(instance.instanceAttr)
 instance.myStaticFunction()
 instance:myInstanceFunction()
+
+-- build-in 'print' that uses 'inspect'
+-- inspect is a module used for pretty-printing tables.
+print({"A", "B"}) -- will no longer print 'table: 0x1234'
+
+-- built-in 'signal' module
+local mySignal = signal()
+local listener = mySignal:listen(function(a, ...)
+    print({ ... })
+end, a) -- Any arguments after the function are passed into the function first
+mySignal:dispatch("Dispatched the signal") -- And the 'dispatch' arguments after them
+listener:stop()
+
+-- auto-wrap strings in parantheses on the Lua side, so that you can call methods on them like this:
+print("ABC":lower())
+
+-- same for numbers:
+print(144:sqrt(), 12 .. 34) -- all digits are instances of a math.number class
+
+-- and for tables, all tables are an instance of a 'Table' class
+local t = {} -- is the same as local t = Table()
+t:append("A")
+
+-- python-like 'all', 'any' and 'none' functions. Pass booleans or arrays of booleans.
+assert(all(true, true, true), "All values must be true")
+assert(any(true, false, false), "At least one value must be true")
+assert(none(false, false, false), "Alll values must be false")
+
+-- better errors
+-- 'Error' base class with a __tostring method that prints it out in the correct format
+-- a try-except block
+class SomeOtherException(Exception) end
+
+pcall
+    -- function body here
+    error("Test error")
+except Exception
+    -- handle the exception here
+except SomeOtherException
+    error(SomeOtherException("Couldn't handle this one"))
+end
+
+-- for loops without mandatory iterator function
+for i, v in {"A", "B", "C"} do
+    print(i, v)
+end

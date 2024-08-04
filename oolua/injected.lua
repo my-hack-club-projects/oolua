@@ -23,13 +23,9 @@ return {
     end,
     print = function(...)
         local new = {}
-        for i, v in { ... } do
-            if type(v) == "table" then
-                new[i] = inspect(v)
-            else
-                new[i] = tostring(v)
-            end
+        for i, v in ipairs({ ... }) do
+            new[i] = inspect(v)
         end
-        print(new)
+        print(table.unpack(new))
     end,
 }
