@@ -3,6 +3,6 @@ local t = {"A", "B", "C"}
 t[4] = "D"
 t:append("E")
 
-for i, v in next, t do
+for i, v in t do
     print(i, v)
 end

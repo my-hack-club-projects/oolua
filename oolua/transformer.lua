@@ -271,6 +271,23 @@ function transformer.transform(tokens)
             end
         end
 
+        -- Generalized iteration.
+        -- Syntax: for i, v in <table> do <body> end; only works if <table> is a table literal or single variable to preserve compatibility with Lua
+        -- Compiles to: for i, v in pairs(<table>) do <body> end
+
+        if token.type == "keyword" and token.data == "in" then
+            if peek_token(3).type == "keyword" and peek_token(3).data == "do" then
+                local t = next_token()
+                if t.type == "ident" then
+                    append(token)
+                    append(transformer.string_to_tokens("pairs(" .. t.data .. ")"))
+                    goto continue
+                else
+                    error("Syntax error: expected identifier after 'in' keyword")
+                end
+            end
+        end
+
         -- Table objects (prefix all '{' with 'Table', pass the table into the Table constructor)
         if token.type == "symbol" and token.data:sub(1, 1) == "{" then
             append(transformer.string_to_tokens("Table" .. token.data))
