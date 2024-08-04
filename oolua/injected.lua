@@ -3,6 +3,8 @@ local inspect = require("modules.inspect")
 return {
     oo = require("modules.oo"),
     inspect = inspect,
+    signal = require("modules.signal"),
+
     Table = require("modules.table"),
     Number = require("modules.number"),
 
