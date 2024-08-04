@@ -14,7 +14,7 @@ transformer.reserved_keywords = {
 }
 transformer.stack_incrementing_keywords = {
     "function", "if", "do",
-    "class", "pcall"
+    "class", "try"
 }
 
 local function _find(t, v)
@@ -37,8 +37,8 @@ function transformer.transform(tokens)
     local class_name = ""
     local class_depth = 0
 
-    local in_pcall_block = false
-    local pcall_depth = 0
+    local in_try_block = false
+    local try_depth = 0
 
     local function append(...)
         for _, token in ipairs({ ... }) do
@@ -66,11 +66,11 @@ function transformer.transform(tokens)
                     class_depth = 0
                     class_name = ""
                     append(transformer.string_to_tokens("--- End of class block"))
-                elseif stack_depth == pcall_depth and in_pcall_block then
-                    in_pcall_block = false
-                    pcall_depth = 0
+                elseif stack_depth == try_depth and in_try_block then
+                    in_try_block = false
+                    try_depth = 0
                     append(transformer.string_to_tokens("end).run()"))
-                    append(transformer.string_to_tokens("--- End of pcall block"))
+                    append(transformer.string_to_tokens("--- End of try block"))
                 elseif stack_depth <= 0 then
                     error("Syntax error: unexpected 'end' keyword")
                 end
@@ -238,19 +238,19 @@ function transformer.transform(tokens)
             end
         end
 
-        -- Parse pcall statement (custom try-catch)
-        -- Syntax: pcall <function body> except <ExceptionClass> as <exception variable> <exception handler body> except <any other ExceptionClass> as <other exception variable> <other exception handler body> end
+        -- Parse try statement (custom try-catch)
+        -- Syntax: try <function body> except <ExceptionClass> as <exception variable> <exception handler body> except <any other ExceptionClass> as <other exception variable> <other exception handler body> end
         -- Compiles to: pcall(function() <function body> end).except(<ExceptionClass>, function(<exception variable>) <exception handler body> end).except(<any other ExceptionClass>, function(<other exception variable>) <other exception handler body> end)
-        if token.type == "ident" and token.data == "pcall" then
-            in_pcall_block = true
-            pcall_depth = stack_depth
+        if token.type == "ident" and token.data == "try" then
+            in_try_block = true
+            try_depth = stack_depth
 
-            append(transformer.string_to_tokens("--- Start of pcall block"))
+            append(transformer.string_to_tokens("--- Start of try block"))
             append(transformer.string_to_tokens("do pcall(function()"))
             goto continue
         end
 
-        if in_pcall_block and stack_depth == pcall_depth then
+        if in_try_block and stack_depth == try_depth then
             if token.type == "ident" and token.data == "except" then
                 local exception_class = next_token()
                 assert(exception_class.type == "ident", "Syntax error: expected identifier after 'except' keyword")
