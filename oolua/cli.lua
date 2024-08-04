@@ -36,5 +36,7 @@ return function(arg, oolua)
 
         local compiled_code = oolua.compile(input)
         oolua.run(compiled_code)
+    else
+        print("Unknown action '" .. action .. "'")
     end
 end
