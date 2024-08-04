@@ -15,7 +15,6 @@ return {
     none = quantifiers.none,
 
     Table = require("modules.table"),
-    Number = require("modules.number"),
     Exception = error_handling.exception,
 
     import = function(modules)

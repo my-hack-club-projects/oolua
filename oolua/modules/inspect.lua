@@ -218,7 +218,6 @@ local function processRecursive(process,
                                 visited)
     if item == nil then return nil end
     if visited[item] then return visited[item] end
-
     local processed = process(item, path)
     if type(processed) == "table" then
         local processedCopy = {}

@@ -1,34 +1,8 @@
-class MyException(Exception)
-end
+local t = {"A", "B", "C"}
 
-try
-    error(MyException("Test"))
-except Exception as e -- This runs, because MyException is a subclass of Exception
-    print(tostring(e) .. " occured")
-except MyException as e
-    print("MyException occured")
-    print(e)
-end
+t[4] = "D"
+t:append("E")
 
-print(MyException:is(Exception)) -- true
-
-class AnotherException(Exception)
-end
-
-print(MyException:is(AnotherException)) -- false
-
-print(MyException:is(MyException)) -- true
-
-class MoreException(AnotherException)
-end
-
-print(MoreException:is(AnotherException)) -- true
-print(MoreException:is(Exception)) -- true
-
-class A(Exception) end
-
-try
-   error(Exception)
-except
-    print("An error occured")
+for i, v in next, t do
+    print(i, v)
 end
