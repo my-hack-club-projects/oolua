@@ -11,16 +11,25 @@ return function(arg, oolua)
                 flag_index = i
             end
         end
-        assert(flag_index and #arg > flag_index, "No output path provided. Use -o <path>")
-        output_path = arg[flag_index + 1]
+        if flag_index then
+            assert(#arg > flag_index, "No output path provided. Use -o <path>")
+            output_path = arg[flag_index + 1]
+        end
+
         input_path = arg[#arg]
-        assert(output_path ~= input_path, "The input path is the same as the output path! Make sure it is the last argument.")
+        assert(output_path ~= input_path,
+            "The input path is the same as the output path! Make sure it is the last argument.")
 
         local file = io.open(input_path, "r")
         local input = file:read("*a")
         file:close()
 
         local compiled_code = oolua.compile(input)
+
+        if not output_path then
+            print(compiled_code)
+            return
+        end
 
         local output_file = io.open(output_path, "w")
         output_file:write(compiled_code)

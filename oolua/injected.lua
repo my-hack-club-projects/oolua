@@ -3,6 +3,8 @@ local inspect = require("modules.inspect")
 return {
     oo = require("modules.oo"),
     inspect = inspect,
+    Table = require("modules.table"),
+
     import = function(modules)
         return {
             from = function(path)

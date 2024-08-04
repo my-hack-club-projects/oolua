@@ -220,6 +220,12 @@ function transformer.transform(tokens)
             end
         end
 
+        -- Table objects (prefix all '{' with 'Table', pass the table into the Table constructor)
+        if token.type == "symbol" and token.data:sub(1, 1) == "{" then
+            append(transformer.string_to_tokens("Table" .. token.data))
+            goto continue
+        end
+
         -- If nothing else, just append the token
         append(token)
 
