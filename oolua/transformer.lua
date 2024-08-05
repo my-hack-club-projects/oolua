@@ -278,7 +278,6 @@ function transformer.transform(tokens)
         if token.type == "keyword" and token.data == "in" then
             local t = next_token()
             if t.type == "ident" and peek_token(2).type == "keyword" and peek_token(2).data == "do" then
-                print("Found single-variable for loop")
                 append(token)
                 append(transformer.string_to_tokens("pairs(" .. t.data .. ")"))
                 goto continue
