@@ -276,15 +276,30 @@ function transformer.transform(tokens)
         -- Compiles to: for i, v in pairs(<table>) do <body> end
 
         if token.type == "keyword" and token.data == "in" then
-            if peek_token(3).type == "keyword" and peek_token(3).data == "do" then
-                local t = next_token()
-                if t.type == "ident" then
-                    append(token)
-                    append(transformer.string_to_tokens("pairs(" .. t.data .. ")"))
-                    goto continue
-                else
-                    error("Syntax error: expected identifier after 'in' keyword")
+            local t = next_token()
+            if t.type == "ident" and peek_token(2).type == "keyword" and peek_token(2).data == "do" then
+                print("Found single-variable for loop")
+                append(token)
+                append(transformer.string_to_tokens("pairs(" .. t.data .. ")"))
+                goto continue
+            elseif t.type == "symbol" and t.data == "{" then
+                local table_literal = { t }
+                local level = 1
+                while level > 0 do
+                    local next = next_token()
+                    table.insert(table_literal, next)
+                    if next.type == "symbol" and next.data == "{" then
+                        level = level + 1
+                    elseif next.type == "symbol" and next.data == "}" then
+                        level = level - 1
+                    end
                 end
+
+                append(token)
+                append(transformer.string_to_tokens("pairs(Table("))
+                append(table.unpack(table_literal))
+                append(transformer.string_to_tokens("))"))
+                goto continue
             end
         end
 

@@ -6,3 +6,7 @@ t:append("E")
 for i, v in t do
     print(i, v)
 end
+
+for i, v in {"A", "B", "C"} do
+    print(i, v)
+end

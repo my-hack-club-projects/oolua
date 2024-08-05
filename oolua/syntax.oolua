@@ -46,9 +46,6 @@ listener:stop()
 -- auto-wrap strings in parantheses on the Lua side, so that you can call methods on them like this:
 print("ABC":lower())
 
--- same for numbers:
-print(144:sqrt(), 12 .. 34) -- all digits are instances of a math.number class
-
 -- and for tables, all tables are an instance of a 'Table' class
 local t = {} -- is the same as local t = Table()
 t:append("A")
@@ -63,7 +60,7 @@ assert(none(false, false, false), "Alll values must be false")
 -- a try-except block
 class SomeOtherException(Exception) end
 
-pcall
+try
     -- function body here
     error("Test error")
 except Exception
